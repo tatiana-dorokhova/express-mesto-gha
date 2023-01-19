@@ -12,7 +12,7 @@ const getUsers = (req, res) => {
 
 const getUserById = (req, res) => {
   User.findById(req.params.userId)
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send(user))
     .catch((err) =>
       res
         .status(404)
@@ -34,21 +34,18 @@ const updateUserProfile = (req, res) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(
-    req.params._id,
+    req.user._id,
     { name, about },
     {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
-      upsert: true, // если пользователь не найден, он будет создан
     }
   )
-    .then((data) => res.send(data))
+    .then((user) => res.send(user))
     .catch((err) =>
-      res
-        .status(500)
-        .send({
-          message: "Произошла ошибка при обновлении профиля" + err.message,
-        })
+      res.status(500).send({
+        message: "Произошла ошибка при обновлении профиля" + err.message,
+      })
     );
 };
 
@@ -56,12 +53,11 @@ const updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
-    req.params._id,
+    req.user._id,
     { avatar },
     {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
-      upsert: true, // если пользователь не найден, он будет создан
     }
   )
     .then((data) => res.send(data))
