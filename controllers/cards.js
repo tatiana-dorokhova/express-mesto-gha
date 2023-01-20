@@ -28,9 +28,16 @@ const deleteCardById = (req, res) => {
         return;
       }
       console.log(card);
-      res.send(card);
+      res.send({ message: "Пост удалён" });
     })
     .catch((err) => {
+      // если формат cardId передан неверно, то выдать ошибку 400
+      if (err instanceof Error.CastError) {
+        res.status(400).send({
+          message: "ID карточки передан в неверном формате: " + err.message,
+        });
+        return;
+      }
       res.status(500).send({
         message: "Произошла ошибка при удалении карточки: " + err.message,
       });
