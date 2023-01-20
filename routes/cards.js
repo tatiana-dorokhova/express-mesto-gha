@@ -15,6 +15,6 @@ router.post("/cards", createCard); // создаёт карточку
 
 router.put("/cards/:cardId/likes", likeCard); // поставить лайк карточке
 
-router.put("/cards/:cardId/likes", dislikeCard); // убрать лайк с карточки
+router.delete("/cards/:cardId/likes", dislikeCard); // убрать лайк с карточки
 
 module.exports = router;
