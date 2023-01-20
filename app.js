@@ -24,6 +24,11 @@ app.use((req, res, next) => {
 app.use("/", usersRouter);
 app.use("/", cardsRouter);
 
+// если обращение происходит к ресурсу, не описанному выше в роутах, то выдавать ошибку 404
+app.all("*", function (req, res) {
+  res.status(404).send({ message: "Запрошена несуществующая страница" });
+});
+
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
   console.log(`App listening on port ${PORT}`);
