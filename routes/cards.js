@@ -4,7 +4,7 @@ const {
   deleteCardById,
   createCard,
   likeCard,
-  unlikeCard,
+  dislikeCard,
 } = require("../controllers/cards");
 
 router.get("/cards", getCards); // возвращает все карточки
@@ -15,6 +15,6 @@ router.post("/cards", createCard); // создаёт карточку
 
 router.put("/cards/:cardId/likes", likeCard); // поставить лайк карточке
 
-router.put("/cards/:cardId/likes", unlikeCard); // убрать лайк с карточки
+router.delete("/cards/:cardId/likes", dislikeCard); // убрать лайк с карточки
 
 module.exports = router;
