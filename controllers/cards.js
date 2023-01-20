@@ -5,10 +5,10 @@ const getCards = (req, res) => {
   Card.find({})
     .then((cardList) => {
       // если коллекция карточек пустая, то вернуть ошибку 404
-      if (cardList.length === 0) {
-        res.status(404).send({ message: "Список карточек пуст" });
-        return;
-      }
+      // if (cardList.length === 0) {
+      //   res.status(404).send({ message: "Список карточек пуст" });
+      //   return;
+      // }
       res.send(cardList);
     })
     .catch((err) =>
