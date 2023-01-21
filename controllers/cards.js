@@ -1,19 +1,25 @@
 const { Error } = require("mongoose");
 const Card = require("../models/card");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  INTERNAL_SERVER_ERROR,
+  INT_SERV_ERR_MESSAGE,
+} = require("../utils/constants");
 
 const getCards = (req, res) => {
   Card.find({})
     .then((cardList) => {
       // если коллекция карточек пустая, то вернуть ошибку 404
       // if (cardList.length === 0) {
-      //   res.status(404).send({ message: "Список карточек пуст" });
+      //   res.status(NOT_FOUND).send({ message: "Список карточек пуст" });
       //   return;
       // }
       res.send(cardList);
     })
-    .catch((err) =>
-      res.status(500).send({
-        message: "Произошла ошибка при запросе списка карточек: " + err.message,
+    .catch(() =>
+      res.status(INTERNAL_SERVER_ERROR).send({
+        message: INT_SERV_ERR_MESSAGE,
       })
     );
 };
@@ -24,7 +30,9 @@ const deleteCardById = (req, res) => {
       // если формат переданного cardId верный,
       // но карточка по нему не найдена (равна null), вернуть ошибку 404
       if (!card) {
-        res.status(404).send({ message: "Карточка с указанным id не найдена" });
+        res
+          .status(NOT_FOUND)
+          .send({ message: "Карточка с указанным id не найдена" });
         return;
       }
       console.log(card);
@@ -33,13 +41,13 @@ const deleteCardById = (req, res) => {
     .catch((err) => {
       // если формат cardId передан неверно, то выдать ошибку 400
       if (err instanceof Error.CastError) {
-        res.status(400).send({
+        res.status(BAD_REQUEST).send({
           message: "ID карточки передан в неверном формате: " + err.message,
         });
         return;
       }
-      res.status(500).send({
-        message: "Произошла ошибка при удалении карточки: " + err.message,
+      res.status(INTERNAL_SERVER_ERROR).send({
+        message: INT_SERV_ERR_MESSAGE,
       });
     });
 };
@@ -52,14 +60,14 @@ const createCard = (req, res) => {
     .catch((err) => {
       // если произошла ошибка валидации данных, то выдать ошибку 400
       if (err instanceof Error.ValidationError) {
-        res.status(400).send({
+        res.status(BAD_REQUEST).send({
           message:
             "Неверный формат данных при создании карточки: " + err.message,
         });
         return;
       }
-      res.status(500).send({
-        message: "Произошла ошибка при создании карточки: " + err.message,
+      res.status(INTERNAL_SERVER_ERROR).send({
+        message: INT_SERV_ERR_MESSAGE,
       });
     });
 };
@@ -74,7 +82,9 @@ const likeCard = (req, res) =>
       // если формат переданного cardId верный,
       // но карточка по нему не найдена (равна null), вернуть ошибку 404
       if (!card) {
-        res.status(404).send({ message: "Карточка с указанным id не найдена" });
+        res
+          .status(NOT_FOUND)
+          .send({ message: "Карточка с указанным id не найдена" });
         return;
       }
       res.send(card);
@@ -82,14 +92,13 @@ const likeCard = (req, res) =>
     .catch((err) => {
       // если формат cardId передан неверно, то выдать ошибку 400
       if (err instanceof Error.CastError) {
-        res.status(400).send({
+        res.status(BAD_REQUEST).send({
           message: "ID карточки передан в неверном формате: " + err.message,
         });
         return;
       }
-      res.status(500).send({
-        message:
-          "Произошла ошибка при установке лайка карточке: " + err.message,
+      res.status(INTERNAL_SERVER_ERROR).send({
+        message: INT_SERV_ERR_MESSAGE,
       });
     });
 
@@ -103,7 +112,9 @@ const dislikeCard = (req, res) =>
       // если формат переданного cardId верный,
       // но карточка по нему не найдена (равна null), вернуть ошибку 404
       if (!card) {
-        res.status(404).send({ message: "Карточка с указанным id не найдена" });
+        res
+          .status(NOT_FOUND)
+          .send({ message: "Карточка с указанным id не найдена" });
         return;
       }
       res.send(card);
@@ -111,13 +122,13 @@ const dislikeCard = (req, res) =>
     .catch((err) => {
       // если формат cardId передан неверно, то выдать ошибку 400
       if (err instanceof Error.CastError) {
-        res.status(400).send({
+        res.status(BAD_REQUEST).send({
           message: "ID карточки передан в неверном формате: " + err.message,
         });
         return;
       }
-      res.status(500).send({
-        message: "Произошла ошибка при снятии лайка с карточки: " + err.message,
+      res.status(INTERNAL_SERVER_ERROR).send({
+        message: INT_SERV_ERR_MESSAGE,
       });
     });
 

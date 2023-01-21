@@ -7,10 +7,11 @@ const cardsRouter = require("./routes/cards");
 const app = express();
 app.use(express.json()); // подключение встроенного body-parser-а json в express для расшифровки тела запросов
 // Слушаем 3000 порт
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, DB_CONN = "mongodb://localhost:27017/mestodb" } =
+  process.env;
 
 mongoose.set("strictQuery", false);
-mongoose.connect("mongodb://localhost:27017/mestodb");
+mongoose.connect(DB_CONN);
 
 // middleware добавляет в каждый запрос объект user (поэтому должен стоять в коде перед всеми остальными app.use)
 app.use((req, res, next) => {
@@ -21,8 +22,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/", usersRouter);
-app.use("/", cardsRouter);
+app.use("/users", usersRouter);
+app.use("/cards", cardsRouter);
 
 // если обращение происходит к ресурсу, не описанному выше в роутах, то выдавать ошибку 404
 app.all("*", function (req, res) {
