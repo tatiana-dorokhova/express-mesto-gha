@@ -1,20 +1,25 @@
 const { Error } = require("mongoose");
 const User = require("../models/user");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  INTERNAL_SERVER_ERROR,
+  INT_SERV_ERR_MESSAGE,
+} = require("../utils/constants");
 
 const getUsers = (req, res) => {
   User.find({})
     .then((usersList) => {
       // если коллекция пользователей пустая, то вернуть ошибку 404
       if (usersList.length === 0) {
-        res.status(404).send({ message: "Список пользователей пуст" });
+        res.status(NOT_FOUND).send({ message: "Список пользователей пуст" });
         return;
       }
       res.send(usersList);
     })
-    .catch((err) => {
-      res.status(500).send({
-        message:
-          "Произошла ошибка при запросе списка пользователей: " + err.message,
+    .catch(() => {
+      res.status(INTERNAL_SERVER_ERROR).send({
+        message: INT_SERV_ERR_MESSAGE,
       });
     });
 };
@@ -26,7 +31,7 @@ const getUserById = (req, res) => {
       // но пользователь по нему не найден (равен null), вернуть ошибку 404
       if (!user) {
         res
-          .status(404)
+          .status(NOT_FOUND)
           .send({ message: "Пользователь с указанным id не найден" });
         return;
       }
@@ -35,13 +40,13 @@ const getUserById = (req, res) => {
     .catch((err) => {
       // если формат userId передан неверно, то выдать ошибку 400
       if (err instanceof Error.CastError) {
-        res.status(400).send({
+        res.status(BAD_REQUEST).send({
           message: "ID пользователя передан в неверном формате: " + err.message,
         });
         return;
       }
-      res.status(500).send({
-        message: "Ошибка при запросе данных пользователя: " + err.message,
+      res.status(INTERNAL_SERVER_ERROR).send({
+        message: INT_SERV_ERR_MESSAGE,
       });
     });
 };
@@ -56,14 +61,14 @@ const createUser = (req, res) => {
     .catch((err) => {
       // если произошла ошибка валидации данных, то выдать ошибку 400
       if (err instanceof Error.ValidationError) {
-        res.status(400).send({
+        res.status(BAD_REQUEST).send({
           message:
             "Неверный формат данных при создании пользователя: " + err.message,
         });
         return;
       }
-      res.status(500).send({
-        message: "Произошла ошибка при создании пользователя: " + err.message,
+      res.status(INTERNAL_SERVER_ERROR).send({
+        message: INT_SERV_ERR_MESSAGE,
       });
     });
 };
@@ -82,7 +87,7 @@ const updateUserProfile = (req, res) => {
     .then((user) => {
       // если пользователь с таким id не найден, то выдать ошибку 404
       if (!user) {
-        res.status(400).send({
+        res.status(BAD_REQUEST).send({
           message:
             "Ошибка при обновлении пользователя: пользователь с заданным id не найден",
         });
@@ -93,15 +98,15 @@ const updateUserProfile = (req, res) => {
     .catch((err) => {
       // если произошла ошибка валидации данных, то выдать ошибку 400
       if (err instanceof Error.ValidationError) {
-        res.status(400).send({
+        res.status(BAD_REQUEST).send({
           message:
             "Неверный формат данных при обновлении пользователя: " +
             err.message,
         });
         return;
       }
-      res.status(500).send({
-        message: "Произошла ошибка при обновлении профиля: " + err.message,
+      res.status(INTERNAL_SERVER_ERROR).send({
+        message: INT_SERV_ERR_MESSAGE,
       });
     });
 };
@@ -120,7 +125,7 @@ const updateUserAvatar = (req, res) => {
     .then((user) => {
       // если пользователь с таким id не найден, то выдать ошибку 404
       if (!user) {
-        res.status(400).send({
+        res.status(BAD_REQUEST).send({
           message:
             "Ошибка при обновлении аватара пользователя: пользователь с заданным id не найден",
         });
@@ -131,15 +136,15 @@ const updateUserAvatar = (req, res) => {
     .catch((err) => {
       // если произошла ошибка валидации данных, то выдать ошибку 400
       if (err instanceof Error.ValidationError) {
-        res.status(400).send({
+        res.status(BAD_REQUEST).send({
           message:
             "Неверный формат данных при обновлении аватара пользователя: " +
             err.message,
         });
         return;
       }
-      res.status(500).send({
-        message: "Произошла ошибка при обновлении аватара: " + err.message,
+      res.status(INTERNAL_SERVER_ERROR).send({
+        message: INT_SERV_ERR_MESSAGE,
       });
     });
 };
