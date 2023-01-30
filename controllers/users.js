@@ -1,10 +1,15 @@
 const { Error } = require("mongoose");
+const bcrypt = require("bcryptjs");
 const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+
 const {
   BAD_REQUEST,
+  UNAUTHORIZED_ERROR,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
   INT_SERV_ERR_MESSAGE,
+  JWT_SALT,
 } = require("../utils/constants");
 
 const getUsers = (req, res) => {
@@ -22,6 +27,13 @@ const getUsers = (req, res) => {
         message: INT_SERV_ERR_MESSAGE,
       });
     });
+};
+
+const getUserMe = (req, res) => {
+  const { _id } = req.user;
+
+  req.params.userId = _id;
+  getUserById(req, res);
 };
 
 const getUserById = (req, res) => {
@@ -52,9 +64,11 @@ const getUserById = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const { name, about, avatar, email, password } = req.body;
 
-  User.create({ name, about, avatar })
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => User.create({ name, about, avatar, email, password: hash }))
     .then((user) => {
       res.send(user);
     })
@@ -149,10 +163,37 @@ const updateUserAvatar = (req, res) => {
     });
 };
 
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      // создадим токен
+      const token = jwt.sign({ _id: user._id }, JWT_SALT, {
+        expiresIn: "7d",
+      });
+
+      // вернём токен
+      // можно вернуть его просто в ответе: res.send({ token });
+      // можно вернуть как httpOnly-куку
+      res
+        .cookie("jwtToken", token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+        })
+        .end();
+    })
+    .catch((err) => {
+      res.status(401).send({ message: err.message });
+    });
+};
+
 module.exports = {
   getUsers,
   createUser,
   getUserById,
+  getUserMe,
   updateUserProfile,
   updateUserAvatar,
+  login,
 };

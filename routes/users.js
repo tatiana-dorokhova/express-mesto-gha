@@ -2,16 +2,16 @@ const router = require("express").Router(); // создали роутер
 const {
   getUsers,
   getUserById,
-  createUser,
+  getUserMe,
   updateUserProfile,
   updateUserAvatar,
 } = require("../controllers/users");
 
 router.get("/", getUsers);
+// этот роут должен идти раньше, чем следующий, чтобы /me не посчиталось за /:userId
+router.get("/me", getUserMe);
 
 router.get("/:userId", getUserById);
-
-router.post("/", createUser);
 
 router.patch("/me", updateUserProfile); // обновляет профиль
 
