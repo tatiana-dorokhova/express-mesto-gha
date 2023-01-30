@@ -1,13 +1,13 @@
 const jwt = require("jsonwebtoken");
-const { UNAUTHORIZED, JWT_SALT } = require("../utils/constants");
+const { JWT_SALT } = require("../utils/constants");
+const UnauthorizedError = require("../errors/unauthorizedError");
 
 module.exports = (req, res, next) => {
   const { jwtToken } = req.cookies;
 
   if (!jwtToken) {
-    return res
-      .status(UNAUTHORIZED)
-      .send({ message: "Необходима авторизация: не пришел токен в куках" });
+    next(new UnauthorizedError("Необходима авторизация"));
+    return;
   }
 
   const token = jwtToken.replace("Bearer ", "");
@@ -16,9 +16,8 @@ module.exports = (req, res, next) => {
   try {
     payload = jwt.verify(token, JWT_SALT);
   } catch (err) {
-    return res
-      .status(UNAUTHORIZED)
-      .send({ message: "Необходима авторизация: токен пришел, но не выверен" });
+    next(new UnauthorizedError("Необходима авторизация"));
+    return;
   }
 
   req.user = payload; // записываем пейлоуд в объект запроса
