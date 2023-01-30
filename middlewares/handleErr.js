@@ -12,4 +12,6 @@ module.exports = (err, req, res, next) => {
     message:
       statusCode === INTERNAL_SERVER_ERROR ? INT_SERV_ERR_MESSAGE : message,
   });
+
+  next();
 };

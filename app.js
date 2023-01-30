@@ -8,6 +8,11 @@ const auth = require("./middlewares/auth");
 const handleErr = require("./middlewares/handleErr");
 const cookieParser = require("cookie-parser");
 const NotFoundError = require("./errors/notFoundError");
+const { celebrate, Joi, errors } = require("celebrate");
+const {
+  REGEX_PASSWORD_PATTERN,
+  REGEX_URL_PATTERN,
+} = require("./utils/constants");
 
 const app = express();
 app.use(cookieParser());
@@ -19,8 +24,33 @@ const { PORT = 3000, DB_CONN = "mongodb://localhost:27017/mestodb" } =
 mongoose.set("strictQuery", false);
 mongoose.connect(DB_CONN);
 
-app.post("/signin", login);
-app.post("/signup", createUser);
+app.post(
+  "/signin",
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(8).regex(REGEX_PASSWORD_PATTERN),
+    }),
+  }),
+  login
+);
+app.post(
+  "/signup",
+  celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().min(2).max(30).default("Жак-Ив Кусто"),
+      about: Joi.string().min(2).max(30).default("Исследователь"),
+      avatar: Joi.string()
+        .default(
+          "https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png"
+        )
+        .regex(REGEX_URL_PATTERN),
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(8).regex(REGEX_PASSWORD_PATTERN),
+    }),
+  }),
+  createUser
+);
 
 // в случае успеха добавляет в каждый запрос свойство req.user
 // с записанным в него токеном
@@ -33,6 +63,9 @@ app.use("/cards", cardsRouter);
 app.all("*", function (req, res, next) {
   return next(new NotFoundError("Запрошена несуществующая страница"));
 });
+
+// обработчик ошибок celebrate
+app.use(errors());
 
 // централизованный обработчик ошибок
 app.use(handleErr);
