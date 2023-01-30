@@ -2,6 +2,7 @@ const { Error } = require("mongoose");
 const Card = require("../models/card");
 const {
   BAD_REQUEST,
+  FORBIDDEN,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
   INT_SERV_ERR_MESSAGE,
@@ -25,18 +26,30 @@ const getCards = (req, res) => {
 };
 
 const deleteCardById = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  // сначала найти карточку в базе и сравнить id пользователя с текущим
+  Card.findById(req.params.cardId)
     .then((card) => {
-      // если формат переданного cardId верный,
-      // но карточка по нему не найдена (равна null), вернуть ошибку 404
+      // если карточка не найдена, то вернуть ошибку
       if (!card) {
         res
           .status(NOT_FOUND)
           .send({ message: "Карточка с указанным id не найдена" });
         return;
       }
-      console.log(card);
-      res.send({ message: "Пост удалён" });
+      // если владелец карточки не равен текущему пользователю, выдать ошибку
+      if (card.owner.toString() !== req.user._id) {
+        console.log("нельзя удалять чужие карточки");
+        res
+          .status(FORBIDDEN)
+          .send({ message: "можно удалять только свои карточки" });
+        return;
+      }
+      // если владелец карточки равен текущему пользователю,
+      // удалить карточку и вернуть сообщение
+      return Card.findByIdAndRemove(req.params.cardId).then((data) => {
+        console.log("data = ", data);
+        res.send({ message: "Карточка с id = " + data.id + " удалена" });
+      });
     })
     .catch((err) => {
       // если формат cardId передан неверно, то выдать ошибку 400
