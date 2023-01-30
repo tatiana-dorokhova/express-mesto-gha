@@ -43,6 +43,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 8,
+      select: false, // при этом флаге при селекте из БД не будет возвращаться это поле
     },
   },
   { versionKey: false }
@@ -51,19 +52,21 @@ const userSchema = new mongoose.Schema(
 // собственный mongoose-метод, проверяющий почту и пароль
 // функция не стрелочная, чтобы использовать this
 userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email }).then((user) => {
-    if (!user) {
-      return Promise.reject(new Error("Неправильные почта или пароль"));
-    }
-
-    return bcrypt.compare(password, user.password).then((matched) => {
-      if (!matched) {
+  return this.findOne({ email })
+    .select("+password") // в этом случае при селекте из БД хэш пароля должен возвращаться
+    .then((user) => {
+      if (!user) {
         return Promise.reject(new Error("Неправильные почта или пароль"));
       }
 
-      return user; // user будет использоваться в контроллере login
+      return bcrypt.compare(password, user.password).then((isHashMatched) => {
+        if (!isHashMatched) {
+          return Promise.reject(new Error("Неправильные почта или пароль"));
+        }
+
+        return user; // user будет использоваться в контроллерах users
+      });
     });
-  });
 };
 
 module.exports = mongoose.model("user", userSchema);

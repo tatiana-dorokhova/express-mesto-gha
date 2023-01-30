@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 
 const {
   BAD_REQUEST,
-  UNAUTHORIZED_ERROR,
+  UNAUTHORIZED,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
   INT_SERV_ERR_MESSAGE,
@@ -184,7 +184,7 @@ const login = (req, res) => {
         .end();
     })
     .catch((err) => {
-      res.status(401).send({ message: err.message });
+      res.status(UNAUTHORIZED).send({ message: err.message });
     });
 };
 

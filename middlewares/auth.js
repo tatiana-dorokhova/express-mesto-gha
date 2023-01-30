@@ -1,12 +1,12 @@
 const jwt = require("jsonwebtoken");
-const { UNAUTHORIZED_ERROR, JWT_SALT } = require("../utils/constants");
+const { UNAUTHORIZED, JWT_SALT } = require("../utils/constants");
 
 module.exports = (req, res, next) => {
   const { jwtToken } = req.cookies;
 
   if (!jwtToken) {
     return res
-      .status(UNAUTHORIZED_ERROR)
+      .status(UNAUTHORIZED)
       .send({ message: "Необходима авторизация: не пришел токен в куках" });
   }
 
@@ -17,7 +17,7 @@ module.exports = (req, res, next) => {
     payload = jwt.verify(token, JWT_SALT);
   } catch (err) {
     return res
-      .status(UNAUTHORIZED_ERROR)
+      .status(UNAUTHORIZED)
       .send({ message: "Необходима авторизация: токен пришел, но не выверен" });
   }
 
