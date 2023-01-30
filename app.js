@@ -5,7 +5,9 @@ const usersRouter = require("./routes/users");
 const cardsRouter = require("./routes/cards");
 const { login, createUser } = require("./controllers/users");
 const auth = require("./middlewares/auth");
+const handleErr = require("./middlewares/handleErr");
 const cookieParser = require("cookie-parser");
+const NotFoundError = require("./errors/notFoundError");
 
 const app = express();
 app.use(cookieParser());
@@ -28,11 +30,13 @@ app.use("/users", usersRouter);
 app.use("/cards", cardsRouter);
 
 // если обращение происходит к ресурсу, не описанному выше в роутах, то выдавать ошибку 404
-app.all("*", function (req, res) {
-  res.status(404).send({ message: "Запрошена несуществующая страница" });
+app.all("*", function (req, res, next) {
+  return next(new NotFoundError("Запрошена несуществующая страница"));
 });
 
+// централизованный обработчик ошибок
+app.use(handleErr);
+
 app.listen(PORT, () => {
-  // Если всё работает, консоль покажет, какой порт приложение слушает
   console.log(`App listening on port ${PORT}`);
 });
