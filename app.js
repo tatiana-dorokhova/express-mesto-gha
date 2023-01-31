@@ -3,8 +3,16 @@ const express = require("express");
 const mongoose = require("mongoose");
 const usersRouter = require("./routes/users");
 const cardsRouter = require("./routes/cards");
+const { login, createUser } = require("./controllers/users");
+const auth = require("./middlewares/auth");
+const handleErr = require("./middlewares/handleErr");
+const cookieParser = require("cookie-parser");
+const NotFoundError = require("./errors/notFoundError");
+const { celebrate, Joi, errors } = require("celebrate");
+const { REGEX_URL_PATTERN } = require("./utils/constants");
 
 const app = express();
+app.use(cookieParser());
 app.use(express.json()); // подключение встроенного body-parser-а json в express для расшифровки тела запросов
 // Слушаем 3000 порт
 const { PORT = 3000, DB_CONN = "mongodb://localhost:27017/mestodb" } =
@@ -13,24 +21,52 @@ const { PORT = 3000, DB_CONN = "mongodb://localhost:27017/mestodb" } =
 mongoose.set("strictQuery", false);
 mongoose.connect(DB_CONN);
 
-// middleware добавляет в каждый запрос объект user (поэтому должен стоять в коде перед всеми остальными app.use)
-app.use((req, res, next) => {
-  req.user = {
-    _id: "63c65e13ac59f0b49c06392b", // вставьте сюда _id созданного пользователя
-  };
+app.post(
+  "/signin",
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(8),
+    }),
+  }),
+  login
+);
+app.post(
+  "/signup",
+  celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().min(2).max(30).default("Жак-Ив Кусто"),
+      about: Joi.string().min(2).max(30).default("Исследователь"),
+      avatar: Joi.string()
+        .default(
+          "https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png"
+        )
+        .regex(REGEX_URL_PATTERN),
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(8),
+    }),
+  }),
+  createUser
+);
 
-  next();
-});
+// в случае успеха добавляет в каждый запрос свойство req.user
+// с записанным в него токеном
+app.use(auth);
 
 app.use("/users", usersRouter);
 app.use("/cards", cardsRouter);
 
 // если обращение происходит к ресурсу, не описанному выше в роутах, то выдавать ошибку 404
-app.all("*", function (req, res) {
-  res.status(404).send({ message: "Запрошена несуществующая страница" });
+app.all("*", function (req, res, next) {
+  return next(new NotFoundError("Запрошена несуществующая страница"));
 });
 
+// обработчик ошибок celebrate
+app.use(errors());
+
+// централизованный обработчик ошибок
+app.use(handleErr);
+
 app.listen(PORT, () => {
-  // Если всё работает, консоль покажет, какой порт приложение слушает
   console.log(`App listening on port ${PORT}`);
 });
