@@ -56,7 +56,10 @@ const createUser = (req, res, next) => {
     .hash(password, 10)
     .then((hash) => User.create({ name, about, avatar, email, password: hash }))
     .then((user) => {
-      res.send(user);
+      // удаляем пароль из ответа
+      const userObjectWithoutPassword = user.toObject();
+      delete userObjectWithoutPassword.password;
+      res.send(userObjectWithoutPassword);
     })
     .catch((err) => {
       // если произошла ошибка валидации данных, то выдать ошибку 400
@@ -165,7 +168,7 @@ const login = (req, res, next) => {
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,
         })
-        .end();
+        .send({ message: "Authorization successful" });
     })
     .catch(next);
 };

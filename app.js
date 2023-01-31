@@ -9,10 +9,7 @@ const handleErr = require("./middlewares/handleErr");
 const cookieParser = require("cookie-parser");
 const NotFoundError = require("./errors/notFoundError");
 const { celebrate, Joi, errors } = require("celebrate");
-const {
-  REGEX_PASSWORD_PATTERN,
-  REGEX_URL_PATTERN,
-} = require("./utils/constants");
+const { REGEX_URL_PATTERN } = require("./utils/constants");
 
 const app = express();
 app.use(cookieParser());
@@ -29,7 +26,7 @@ app.post(
   celebrate({
     body: Joi.object().keys({
       email: Joi.string().required().email(),
-      password: Joi.string().required().min(8).regex(REGEX_PASSWORD_PATTERN),
+      password: Joi.string().required().min(8),
     }),
   }),
   login
@@ -46,7 +43,7 @@ app.post(
         )
         .regex(REGEX_URL_PATTERN),
       email: Joi.string().required().email(),
-      password: Joi.string().required().min(8).regex(REGEX_PASSWORD_PATTERN),
+      password: Joi.string().required().min(8),
     }),
   }),
   createUser
