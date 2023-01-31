@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const { isEmail } = require("validator");
 const UnauthorizedError = require("../errors/unauthorizedError");
+const { REGEX_URL_PATTERN } = require("../utils/constants");
 
 const userSchema = new mongoose.Schema(
   {
@@ -24,6 +25,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       default:
         "https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png",
+      validate: {
+        validator: function (v) {
+          return REGEX_URL_PATTERN.test(v);
+        },
+        message: (props) => `${props.value} - ссылка имеет неправильный формат`,
+      },
     },
     // уникальный email пользователя
     email: {
