@@ -1,5 +1,5 @@
 const { celebrate, Joi } = require("celebrate");
-const { REGEX_URL_PATTERN } = require("./utils/constants");
+const { REGEX_URL_PATTERN } = require("../utils/constants");
 
 const router = require("express").Router(); // создали роутер
 const {
