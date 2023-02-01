@@ -80,12 +80,14 @@ const createUser = (req, res, next) => {
     });
 };
 
-const updateUserProfile = (req, res, next) => {
-  const { name, about } = req.body;
+const updateUserData = (req, res, next) => {
+  // валидации на полях name, about, avatar не позволят передать в req лишние данные
+  // если какое-то поле не пришло, то оно в этот объект не попадет и не будет обновляться
+  const { name, about, avatar } = req.body;
 
   User.findByIdAndUpdate(
     req.user._id,
-    { name, about },
+    { name, about, avatar },
     {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
@@ -95,7 +97,7 @@ const updateUserProfile = (req, res, next) => {
       // если пользователь с таким id не найден, то выдать ошибку 404
       if (!user) {
         throw new NotFoundError(
-          'Ошибка при обновлении пользователя: пользователь с заданным id не найден',
+          'Пользователь с заданным id не найден',
         );
       }
       res.send(user);
@@ -105,41 +107,7 @@ const updateUserProfile = (req, res, next) => {
       if (err instanceof Error.ValidationError) {
         next(
           new BadRequestError(
-            'Неверный формат данных при обновлении пользователя',
-          ),
-        );
-        return;
-      }
-      next(err);
-    });
-};
-
-const updateUserAvatar = (req, res, next) => {
-  const { avatar } = req.body;
-
-  User.findByIdAndUpdate(
-    req.user._id,
-    { avatar },
-    {
-      new: true, // обработчик then получит на вход обновлённую запись
-      runValidators: true, // данные будут валидированы перед изменением
-    },
-  )
-    .then((user) => {
-      // если пользователь с таким id не найден, то выдать ошибку 404
-      if (!user) {
-        throw new NotFoundError(
-          'Ошибка при обновлении аватара пользователя: пользователь с заданным id не найден',
-        );
-      }
-      res.send(user);
-    })
-    .catch((err) => {
-      // если произошла ошибка валидации данных, то выдать ошибку 400
-      if (err instanceof Error.ValidationError) {
-        next(
-          new BadRequestError(
-            'Неверный формат данных при обновлении аватара пользователя',
+            `Неверный формат данных при обновлении пользователя ${err.message}`,
           ),
         );
         return;
@@ -176,7 +144,6 @@ module.exports = {
   createUser,
   getUserById,
   getUserMe,
-  updateUserProfile,
-  updateUserAvatar,
+  updateUserData,
   login,
 };
