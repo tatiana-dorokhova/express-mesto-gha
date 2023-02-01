@@ -1,47 +1,47 @@
-const { celebrate, Joi } = require("celebrate");
-const { REGEX_URL_PATTERN } = require("../utils/constants");
-const router = require("express").Router(); // создали роутер
+const { celebrate, Joi } = require('celebrate');
+const router = require('express').Router(); // создали роутер
+const { REGEX_URL_PATTERN } = require('../utils/constants');
 const {
   getUsers,
   getUserById,
   getUserMe,
   updateUserProfile,
   updateUserAvatar,
-} = require("../controllers/users");
+} = require('../controllers/users');
 
-router.get("/", getUsers);
+router.get('/', getUsers);
 // этот роут должен идти раньше, чем следующий, чтобы /me не посчиталось за /:userId
-router.get("/me", getUserMe);
+router.get('/me', getUserMe);
 
 router.get(
-  "/:userId",
+  '/:userId',
   celebrate({
     params: Joi.object().keys({
-      userId: Joi.string().hex().length(24),
+      userId: Joi.string().required().hex().length(24),
     }),
   }),
-  getUserById
+  getUserById,
 );
 
 router.patch(
-  "/me",
+  '/me',
   celebrate({
     body: Joi.object().keys({
-      name: Joi.string().min(2).max(30),
-      about: Joi.string().min(2).max(30),
+      name: Joi.string().required().min(2).max(30),
+      about: Joi.string().required().min(2).max(30),
     }),
   }),
-  updateUserProfile
+  updateUserProfile,
 ); // обновляет профиль
 
 router.patch(
-  "/me/avatar",
+  '/me/avatar',
   celebrate({
     body: Joi.object().keys({
-      avatar: Joi.string().regex(REGEX_URL_PATTERN),
+      avatar: Joi.string().required().regex(REGEX_URL_PATTERN),
     }),
   }),
-  updateUserAvatar
+  updateUserAvatar,
 ); // обновляет аватар
 
 module.exports = router;

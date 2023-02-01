@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const { validateUrl } = require('../utils/validateUrl');
 
 const cardSchema = new mongoose.Schema(
   {
@@ -13,11 +14,15 @@ const cardSchema = new mongoose.Schema(
     link: {
       type: String,
       required: true,
+      validate: {
+        validator: validateUrl,
+        message: (props) => `${props.value} - ссылка имеет неправильный формат`,
+      },
     },
     // ссылка на модель автора карточки
     owner: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
+      ref: 'user',
       required: true,
     },
     // список лайкнувших пост пользователей
@@ -25,8 +30,7 @@ const cardSchema = new mongoose.Schema(
       type: [
         {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "user",
-          required: true,
+          ref: 'user',
         },
       ],
       default: [],
@@ -34,11 +38,10 @@ const cardSchema = new mongoose.Schema(
     // дата создания
     createdAt: {
       type: Date,
-      required: true,
       default: Date.now,
     },
   },
-  { versionKey: false } // не создавать поле версии __v в БД
+  { versionKey: false }, // не создавать поле версии __v в БД
 );
 
-module.exports = mongoose.model("card", cardSchema);
+module.exports = mongoose.model('card', cardSchema);
