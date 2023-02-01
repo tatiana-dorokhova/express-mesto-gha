@@ -1,7 +1,7 @@
 const {
   INTERNAL_SERVER_ERROR,
   INT_SERV_ERR_MESSAGE,
-} = require("../utils/constants");
+} = require('../utils/constants');
 
 module.exports = (err, req, res, next) => {
   // если у ошибки нет статуса, выставляем 500
